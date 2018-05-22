@@ -1,6 +1,7 @@
 const express = require('express');
 const debug = require('debug')('app:bookRoutes');
-const { MongoClient, ObjectID } = require('mongodb');
+const bookController = require('../controllers/bookController');
+const bookService = require('../services/goodreadsServices');
 
 const bookRouter = express.Router();
 
@@ -45,67 +46,12 @@ function router(nav) {
 
   //   return bookRouter;
   // }
-  bookRouter.use((req, res, next) => {
-    if (req.user) {
-      next();
-    } else {
-      res.redirect('/');
-    }
-  });
+  const { getIndex, getById, middleware } = bookController(bookService, nav);
+  bookRouter.use(middleware);
   bookRouter.route('/')
-    .get((req, res) => {
-      const url = 'mongodb://127.0.0.1:27017/';
-      const dbName = 'libraryApp';
-      (async function mongo() {
-        let client;
-        try {
-          client = await MongoClient.connect(url);
-          const db = client.db(dbName);
-          const bookCollection = await db.collection('books');
-          const books = await bookCollection.find().toArray();
-          debug('check ', books);
-          res.render(
-            'bookListView',
-            {
-              nav,
-              title: 'Books',
-              books
-            }
-          );
-        } catch (error) {
-          debug(error.stack);
-          res.send('error');
-        }
-        client.close();
-      }());
-    });
+    .get(getIndex);
   bookRouter.route('/:id')
-    .get((req, res) => {
-      const { id } = req.params;
-      const url = 'mongodb://127.0.0.1:27017/';
-      const dbName = 'libraryApp';
-
-      (async function singleQuery() {
-        let client;
-        try {
-          client = await MongoClient.connect(url);
-          const db = client.db(dbName);
-          const bookCollection = db.collection('books');
-          const queryBook = await bookCollection.findOne({ _id: new ObjectID(id) });
-          debug(queryBook);
-          res.render(
-            'bookView',
-            {
-              nav,
-              title: 'Books',
-              book: queryBook
-            }
-          );
-        } catch (error) {
-          debug(error.stack);
-        }
-      }());
-    });
+    .get(getById);
 
   return bookRouter;
 }

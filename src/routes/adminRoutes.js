@@ -10,12 +10,14 @@ function router(nav) {
       title: 'Learning JavaScript Design Patterns',
       genre: 'Technology',
       author: 'Addy Osmani',
+      bookId: 656,
       read: false
     },
     {
       title: 'Eloquent JavaScript, Second Edition',
       genre: 'Technology',
       author: 'Marijn Haverbeke',
+      bookId: 24280,
       read: false
     },
     {
